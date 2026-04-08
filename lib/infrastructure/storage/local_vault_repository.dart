@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
-
 import '../../application/ports/vault_repository.dart';
 import '../../domain/entities/stored_vault_file.dart';
 import '../../domain/exceptions/vault_exception.dart';
+import 'app_data_directory.dart';
 
 class LocalVaultRepository implements VaultRepository {
   LocalVaultRepository(this._vaultFile);
@@ -15,7 +14,7 @@ class LocalVaultRepository implements VaultRepository {
   static Future<LocalVaultRepository> create({
     String filename = 'password_manager_vault.json',
   }) async {
-    final Directory directory = await getApplicationSupportDirectory();
+    final Directory directory = AppDataDirectory.resolve();
     if (!directory.existsSync()) {
       await directory.create(recursive: true);
     }
