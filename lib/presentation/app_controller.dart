@@ -164,11 +164,14 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> saveCredential({
+  Future<String> saveCredential({
     String? credentialId,
     required CredentialDraft draft,
   }) async {
     final VaultSession currentSession = _requireSession();
+    final Set<String> beforeIds = currentSession.vaultData.credentials
+        .map((CredentialItem item) => item.id)
+        .toSet();
     _session = credentialId == null
         ? await _addCredentialUseCase.execute(
             session: currentSession,
@@ -185,6 +188,13 @@ class AppController extends ChangeNotifier {
     _errorMessage = null;
     _touch();
     notifyListeners();
+    if (credentialId != null) {
+      return credentialId;
+    }
+    final VaultSession updatedSession = _requireSession();
+    return updatedSession.vaultData.credentials
+        .firstWhere((CredentialItem item) => !beforeIds.contains(item.id))
+        .id;
   }
 
   Future<void> deleteCredential(String credentialId) async {
